@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ne"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ब्याज असुली तुलना प्रतिवेदन</title><style>
+:root{--bg:#f5f6f8;--card:#fff;--tx:#1b2430;--mu:#677489;--bd:#dfe3ea;--ac:#1f5fbf;--ok:#16794a;--bad:#b4281e;--hd:#eef2f8}
+@media(prefers-color-scheme:dark){:root{--bg:#12161c;--card:#1b212a;--tx:#e8edf4;--mu:#97a3b5;--bd:#2c3542;--ac:#6ea3f5;--ok:#4cc58b;--bad:#f0877e;--hd:#232b36}}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Noto Sans Devanagari","Mangal",sans-serif;background:var(--bg);color:var(--tx);padding:16px}
+h1{font-size:20px;margin:0 0 4px}.sub{color:var(--mu);font-size:13px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px}
+.up{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.up label{display:block;font-size:13px;color:var(--mu);margin-bottom:4px}
+input[type=file]{width:100%;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{border:1px solid var(--bd);border-radius:16px;padding:3px 10px;font-size:12px;cursor:pointer;user-select:none}
+.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px}.kpi b{display:block;font-size:20px;margin-top:2px}.kpi span{font-size:12px;color:var(--mu)}
+.tabs{display:flex;gap:6px;margin-bottom:12px}.tab{padding:8px 16px;border-radius:8px;border:1px solid var(--bd);background:var(--card);cursor:pointer;font-size:14px}.tab.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}th:first-child,td:first-child,th.l,td.l{text-align:left}
+th{background:var(--hd);position:sticky;top:0}tr.row{cursor:pointer}tr.row:hover td{background:var(--hd)}tfoot td{font-weight:700;background:var(--hd)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.note{font-size:12px;color:var(--mu);line-height:1.6}
+.bar{height:6px;background:var(--bd);border-radius:3px;min-width:60px}.bar i{display:block;height:100%;background:var(--ok);border-radius:3px}
+select,button{font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+.det td{background:var(--hd);font-size:12px}.hide{display:none}
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.seg button{border-radius:0}.seg button:first-child{border-radius:6px 0 0 6px}.seg button:last-child{border-radius:0 6px 6px 0}.seg button.on{background:var(--ac);color:#fff;border-color:var(--ac)}input[type=search]{font-size:13px;padding:5px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx);min-width:220px}
+@media print{.up,.tabs,.chips,.nop{display:none}body{padding:0}}
+
+.bl{display:flex;gap:8px;align-items:center;margin:4px 0;font-size:13px}.bl input[type=text]{font-size:13px;padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx);width:170px}
+.ctl2{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:10px;font-size:13px}.ctl2 input[type=number]{width:70px;font-size:13px;padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx)}
+.warn{color:var(--bad);font-size:13px;margin-top:6px}</style></head><body>
+<h1>ब्याज असुली तुलना (कुनै पनि मसान्त बनाम आजको N002)</h1>
+<div class="sub">आधार महिनाको NRB 2.2 र आजको N002 को "तिर्न बाँकी ब्याज" दाज्ने</div>
+<div class="card nop">
+ <div class="up">
+  <div><label>१) आधार फाइल — कुनै महिना मसान्तको NRB2.2 (एक वा बढी, थप्न सकिन्छ)</label><input type="file" id="fa" accept=".csv" multiple><div id="bl"></div></div>
+  <div><label>२) आजको N002 NRB2.2</label><input type="file" id="fb" accept=".csv"><div class="note" id="curlab"></div></div>
+ </div>
+ <div class="ctl2">
+  <span>आधार ब्याज: <select id="meas"><option value="overdue">पाकेको / उठ्न नसकेको (Overdue Interest)</option><option value="outstanding">तिर्न बाँकी (Outstanding) ब्याज</option></select></span>
+  <span title="आधार मितिपछि थपिएको नयाँ ब्याज N002 मा पनि जोडिएको हुन्छ। ० = सिधै दाज्ने">नयाँ ब्याज समायोजन (दिन): <input type="number" id="adj" value="0" min="0" max="365"></span>
+  <span>Fresh Loan मा ब्याज बाँकी (कम्तीमा कति महिनाको): <input type="number" id="thr" value="1" min="0.1" step="0.5"></span>
+ </div>
+ <div class="warn" id="warn"></div>
+ <div class="note" style="margin-top:10px">शाखा छान्नुहोस्:</div><div class="chips" id="chips"></div>
+</div>
+<div id="out" class="hide">
+ <div class="kpis" id="kpis"></div>
+ <div class="tabs" id="cats">
+  <div class="tab on" data-c="all">सबै ऋणी</div><div class="tab" data-c="full">पूर्ण असुल</div><div class="tab" data-c="part">आंशिक असुल</div><div class="tab" data-c="zero">शून्य असुल</div><div class="tab" data-c="fresh">Fresh Loan — ब्याज नउठेको</div>
+ </div>
+ <div class="card">
+  <div class="ctl nop">
+   <span class="seg" id="views"><button data-v="br" class="on">शाखागत</button><button data-v="st">कर्मचारीगत</button><button data-v="mb">सदस्यगत</button></span>
+   <span id="bfw">शाखा: <select id="bf"></select></span>
+   <span id="sfw" class="hide">कर्मचारी: <select id="sf2"></select></span>
+   <input type="search" id="q" placeholder="सदस्य / समूह / खाता खोज्नुहोस्" class="hide">
+   <button id="csv">CSV डाउनलोड</button>
+  </div>
+  <div class="note" id="ctitle" style="margin:8px 0"></div>
+  <div class="wrap"><table id="tb"></table></div>
+  <div style="margin-top:8px"><button id="more" class="hide">थप देखाउनुहोस्</button></div>
+ </div>
+ <div class="card note"><b>गणना विधि:</b><br>
+ • <b>आधार ब्याज</b> = छानिएको आधार फाइलमा ब्याज (Overdue वा Outstanding) शून्यभन्दा बढी भएका ऋणी।<br>
+ • <b>अहिले बाँकी</b> = आजको N002 को तिर्न बाँकी ब्याज (Outstanding Interest); ऋण N002 मा नभए चुक्ता मानी ० ।<br>
+ • <b>असुल</b> = आधार ब्याज − अहिले बाँकी। <b>पूर्ण</b>: बाँकी ० (वा चुक्ता); <b>आंशिक</b>: बाँकी आधारभन्दा कम; <b>शून्य</b>: बाँकी आधारजति वा बढी (कुनै असुल नभएको); <b>बढेको</b> = बाँकी − आधार।<br>
+ • N002 को बाँकी ब्याजमा आधार मितिपछि थपिएको नयाँ ब्याज पनि हुन्छ, त्यसैले सिधै दाज्दा असुल कम देखिन सक्छ। "समायोजन (दिन)" मा आधार मितिदेखि आजसम्मको दिन राखे नयाँ ब्याज घटाएर हेर्न मिल्छ।<br>
+ • <b>Fresh Loan — ब्याज नउठेको</b> = आजको N002 मा Fresh Loan वर्गका ऋणी जसको बाँकी ब्याज मौज्दात × दर अनुसारको मासिक ब्याजको कम्तीमा माथि राखेको महिना बराबर वा बढी छ।</div>
+</div>
+<script>
+function parseCSV(t){const rows=[];let row=[],f='',q=false;
+for(let i=0;i<t.length;i++){const c=t[i];
+ if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+ else if(c==='"')q=true;else if(c===','){row.push(f);f=''}
+ else if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;row.push(f);f='';rows.push(row);row=[]}
+ else f+=c}
+if(f!==''||row.length){row.push(f);rows.push(row)}return rows}
+const num=s=>{const v=parseFloat(String(s||'').replace(/,/g,'').trim());return isNaN(v)?0:v};
+const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
+function findCols(rows){
+ const F={oi:-1,si:-1,p:-1,opr:-1,cls:-1,days:-1,rate:-1,staff:-1};
+ const pats={p:/^outstanding principal$/i,si:/^outstand\S* interest$/i,opr:/^overdue principal$/i,oi:/^overdue interest$/i,cls:/^classification$/i,days:/^days$/i,rate:/^inter\S* rate$/i,staff:/^staff$/i};
+ for(let ri=0;ri<Math.min(rows.length,4);ri++)rows[ri].forEach((c,ci)=>{const n=norm(c);for(const k in pats)if(F[k]<0&&pats[k].test(n))F[k]=ci});
+ return F}
+function parseLoans(text){const rows=parseCSV(text),F=findCols(rows),map=new Map();
+ const g=(r,k)=>F[k]>=0?num(r[F[k]]):0,s=(r,k)=>F[k]>=0?norm(r[F[k]]):'';
+ for(const r of rows){if(r.length>25&&/^\d+$/.test((r[0]||'').trim())){const acc=norm(r[12]);
+  map.set(acc,{acc,branch:norm(r[2]).replace(/^Branch Office\s*/i,''),group:norm(r[3]),name:norm(r[5]),disp:norm(r[11]),
+   p:g(r,'p'),si:g(r,'si'),opr:g(r,'opr'),oi:g(r,'oi'),days:g(r,'days'),rate:g(r,'rate'),staff:s(r,'staff'),cls:s(r,'cls')})}}
+ return {map,F}}
+function compare(A,B,measure,adj){const items=[];adj=adj||0;const tol=adj>0?2:1;
+ for(const a of A.map.values()){const b0=measure==='overdue'?a.oi:a.si;if(b0<=0)continue;
+  const b=B.map.get(a.acc);const C0=b?b.si:0;const C=b?Math.max(0,C0-a.p*a.rate/36500*adj):0;let cat,rec;
+  if(!b||C<tol){cat='full';rec=b0}else if(b0-C<tol){cat='zero';rec=0}else{cat='part';rec=b0-C}
+  items.push({acc:a.acc,branch:a.branch,staff:a.staff||(b&&b.staff)||'(नखुलेको)',group:a.group,name:a.name,base:b0,cur:C0,rec,inc:Math.max(0,C-b0),cat,
+   daysThen:a.days,daysNow:b?b.days:null,clsNow:b?b.cls.replace(/\(.*\)/,'').trim():'चुक्ता'})}
+ return items}
+function freshList(B,thr){const out=[];
+ for(const b of B.map.values()){if(!/^fresh/i.test(b.cls)||b.p<=0||b.si<=0||b.rate<=0)continue;
+  const months=b.si/(b.p*b.rate/1200);if(months<thr)continue;
+  out.push({acc:b.acc,branch:b.branch,staff:b.staff||'(नखुलेको)',group:b.group,name:b.name,p:b.p,si:b.si,rate:b.rate,months,days:b.days,disp:b.disp})}
+ return out}
+
+
+const fmt=n=>Math.round(n).toLocaleString('en-IN');
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const DEF=['mangalpur','rajahar','shaktikhor','bhanu','kabilash','bulingtar','thori'];
+const $=id=>document.getElementById(id);
+const CN={all:'सबै ऋणी',full:'पूर्ण असुली भएका',part:'आंशिक असुली भएका',zero:'हालसम्म १ रुपैयाँ पनि असुल नभएका',fresh:'Fresh Loan मा ब्याज नउठेका (आजको N002)'};
+let BL=[],SB=-1,CURP=null,CURNAME='',ITEMS=[],FR=[],CAT='all',VIEW='br',LIM=300,SEL=new Set(),ALLBR=[],CUR=[],LN=0;
+const readTxt=f=>new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsText(f)});
+const lab=n=>{const m=n.match(/\d{4}-\d{2}-\d{2}/);return m?m[0]:n.replace(/\.csv$/i,'')};
+$('fa').onchange=async e=>{for(const f of e.target.files){if(BL.some(b=>b.file===f.name))continue;BL.push({file:f.name,label:lab(f.name),text:await readTxt(f),P:null});SB=BL.length-1}e.target.value='';blui();go()};
+$('fb').onchange=async e=>{const f=e.target.files[0];if(!f)return;CURNAME=lab(f.name);CURP=parseLoans(await readTxt(f));$('curlab').textContent='N002: '+CURNAME;
+ ALLBR=[...new Set([...CURP.map.values()].map(x=>x.branch))].sort((a,b)=>a.localeCompare(b));
+ if(!SEL.size)ALLBR.forEach(b=>{if(DEF.includes(b.toLowerCase()))SEL.add(b)});chips();go()};
+function blui(){$('bl').innerHTML=BL.map((b,i)=>`<div class="bl"><input type="radio" name="sb" ${i===SB?'checked':''} data-i="${i}"><input type="text" value="${esc(b.label)}" data-l="${i}" title="आधारको नाम (जस्तै: भदौ मसान्त)"><span class="note">${esc(b.file)}</span></div>`).join('');
+ $('bl').querySelectorAll('input[type=radio]').forEach(r=>r.onchange=()=>{SB=+r.dataset.i;go()});
+ $('bl').querySelectorAll('input[type=text]').forEach(t=>t.oninput=()=>{BL[+t.dataset.l].label=t.value;title()})}
+function chips(){const c=$('chips');c.innerHTML='';ALLBR.forEach(b=>{const d=document.createElement('div');d.className='chip'+(SEL.has(b)?' on':'');d.textContent=b;d.onclick=()=>{SEL.has(b)?SEL.delete(b):SEL.add(b);chips();render()};c.appendChild(d)})}
+function go(){if(!CURP)return;ITEMS=[];$('warn').textContent='';
+ const bl=BL[SB];if(bl){bl.P=bl.P||parseLoans(bl.text);const m=$('meas').value;
+  if(m==='overdue'&&bl.P.F.oi<0)$('warn').textContent='यो आधार फाइलमा Overdue Interest कोलम छैन — "तिर्न बाँकी (Outstanding) ब्याज" छान्नुहोस्।';
+  else ITEMS=compare(bl.P,CURP,m,+$('adj').value||0)}
+ FR=freshList(CURP,+$('thr').value||1);$('out').classList.remove('hide');render()}
+['meas','adj','thr'].forEach(i=>$(i).onchange=go);
+const title=()=>{if($('ctitle'))$('ctitle').textContent=CN[CAT]+(CAT==='fresh'?' ('+CURNAME+')':(BL[SB]?' — आधार: '+BL[SB].label+' → आज ('+CURNAME+')':''))+' — '+LN+' ऋणी'};
+function base(){const b=$('bf').value,s=$('sf2').value,q=$('q').value.trim().toLowerCase();const src=CAT==='fresh'?FR:ITEMS;
+ return src.filter(i=>SEL.has(i.branch)&&(CAT==='fresh'||CAT==='all'||i.cat===CAT)&&(b==='*'||i.branch===b)&&(s==='*'||i.staff===s)&&(!q||(i.name+i.group+i.staff+i.acc).toLowerCase().includes(q)))}
+function fillSel(){const src=CAT==='fresh'?FR:ITEMS;const b=$('bf'),cb=b.value||'*';b.innerHTML='<option value="*">सबै चयन गरिएका शाखा</option>'+[...SEL].sort().map(x=>`<option>${esc(x)}</option>`).join('');b.value=[...b.options].some(o=>o.value===cb)?cb:'*';
+ const s=$('sf2'),cs=s.value||'*';const st=[...new Set(src.filter(i=>SEL.has(i.branch)&&(b.value==='*'||i.branch===b.value)).map(i=>i.staff))].sort();s.innerHTML='<option value="*">सबै कर्मचारी</option>'+st.map(x=>`<option>${esc(x)}</option>`).join('');s.value=st.includes(cs)?cs:'*'}
+const bar=p=>`<div class="bar"><i style="width:${Math.min(100,Math.max(0,p))}%"></i></div>`;
+function agg(list,kf){const m={};for(const i of list){const k=kf(i);const o=m[k]??={k,n:0,base:0,cur:0,full:0,part:0,inc:0,si:0,p:0};o.n++;
+ if(CAT==='fresh'){o.si+=i.si;o.p+=i.p}else{o.base+=i.base;o.cur+=i.cur;if(i.cat==='full')o.full+=i.rec;else if(i.cat==='part')o.part+=i.rec;o.inc+=i.inc}}
+ return Object.values(m).sort((a,b)=>CAT==='fresh'?b.si-a.si:b.cur-a.cur)}
+function tot(L){const t={k:'जम्मा',n:0,base:0,cur:0,full:0,part:0,inc:0,si:0,p:0};L.forEach(o=>{for(const k of['n','base','cur','full','part','inc','si','p'])t[k]+=o[k]});return t}
+function arow(o){if(CAT==='fresh')return `<td class="l">${esc(o.k)}</td><td>${o.n}</td><td class="bad">${fmt(o.si)}</td><td>${fmt(o.p)}</td>`;
+ const r=o.full+o.part,p=o.base?r/o.base*100:0;
+ return `<td class="l">${esc(o.k)}</td><td>${o.n}</td><td>${fmt(o.base)}</td><td class="bad">${fmt(o.cur)}</td><td class="ok">${fmt(o.full)}</td><td class="ok">${fmt(o.part)}</td><td class="ok"><b>${fmt(r)}</b></td><td>${p.toFixed(1)}%</td><td class="bad">${fmt(o.inc)}</td><td>${bar(p)}</td>`}
+const AH=n=>CAT==='fresh'?`<thead><tr><th class="l">${n}</th><th>ऋणी संख्या</th><th>तिर्न बाँकी ब्याज (N002)</th><th>मौज्दात मूलधन</th></tr></thead>`:
+ `<thead><tr><th class="l">${n}</th><th>ऋणी संख्या</th><th>आधार ब्याज</th><th>अहिले बाँकी (N002)</th><th>पूर्ण असुल</th><th>आंशिक असुल</th><th>कुल असुल</th><th>असुली %</th><th>बढेको ब्याज</th><th></th></tr></thead>`;
+function render(){if(!CURP)return;fillSel();
+ $('sfw').classList.toggle('hide',VIEW!=='mb');$('q').classList.toggle('hide',VIEW!=='mb');$('bfw').classList.toggle('hide',VIEW==='br');
+ const all=ITEMS.filter(i=>SEL.has(i.branch));const sm=(l,k)=>l.reduce((s,i)=>s+i[k],0);const ct=c=>all.filter(i=>i.cat===c);
+ const fr=FR.filter(i=>SEL.has(i.branch));
+ $('kpis').innerHTML=[['चयन गरिएका शाखा',SEL.size],['आधार ब्याज',fmt(sm(all,'base'))],['अहिले बाँकी (N002)',fmt(sm(all,'cur'))],['कुल असुल',fmt(sm(all,'rec'))],['असुली %',(sm(all,'base')?sm(all,'rec')/sm(all,'base')*100:0).toFixed(1)+'%'],
+  ['पूर्ण असुल ('+ct('full').length+' जना)',fmt(sm(ct('full'),'rec'))],['आंशिक असुल ('+ct('part').length+' जना)',fmt(sm(ct('part'),'rec'))],['शून्य असुल ('+ct('zero').length+' जना) — आधार',fmt(sm(ct('zero'),'base'))],
+  ['Fresh Loan ब्याज नउठेको ('+fr.length+' जना)',fmt(sm(fr,'si'))]].map(([a,b])=>`<div class="kpi"><span>${a}</span><b>${b}</b></div>`).join('');
+ const list=base();LN=list.length;$('more').classList.add('hide');
+ if(VIEW==='br'||VIEW==='st'){const L=agg(list,VIEW==='br'?i=>i.branch:i=>i.staff+' ('+i.branch+')');const nm=VIEW==='br'?'शाखा':'कर्मचारी';
+  CUR=L.map(o=>CAT==='fresh'?{[nm]:o.k,'ऋणी':o.n,'तिर्न बाँकी ब्याज':Math.round(o.si),'मौज्दात':Math.round(o.p)}:{[nm]:o.k,'ऋणी':o.n,'आधार ब्याज':Math.round(o.base),'अहिले बाँकी':Math.round(o.cur),'पूर्ण असुल':Math.round(o.full),'आंशिक असुल':Math.round(o.part),'बढेको':Math.round(o.inc)});
+  $('tb').innerHTML=AH(nm)+'<tbody>'+L.map(o=>`<tr>${arow(o)}</tr>`).join('')+'</tbody><tfoot><tr>'+arow(tot(L))+'</tr></tfoot>'}
+ else if(CAT==='fresh'){const m=list.slice().sort((a,b)=>b.si-a.si);
+  CUR=m.map(x=>({'शाखा':x.branch,'कर्मचारी':x.staff,'समूह':x.group,'सदस्य':x.name,'खाता':x.acc,'मौज्दात':Math.round(x.p),'दर':x.rate,'तिर्न बाँकी ब्याज':Math.round(x.si),'कति महिनाको ब्याज':+x.months.toFixed(1),'वितरण मिति':x.disp}));
+  $('tb').innerHTML='<thead><tr><th class="l">शाखा</th><th class="l">कर्मचारी</th><th class="l">समूह</th><th class="l">सदस्य</th><th class="l">खाता</th><th>मौज्दात</th><th>दर</th><th>तिर्न बाँकी ब्याज</th><th>महिना बराबर</th><th>वितरण मिति</th></tr></thead><tbody>'+
+   m.slice(0,LIM).map(x=>`<tr><td class="l">${esc(x.branch)}</td><td class="l">${esc(x.staff)}</td><td class="l">${esc(x.group)}</td><td class="l">${esc(x.name)}</td><td class="l">${esc(x.acc)}</td><td>${fmt(x.p)}</td><td>${x.rate}</td><td class="bad">${fmt(x.si)}</td><td>${x.months.toFixed(1)}</td><td>${esc(x.disp)}</td></tr>`).join('')+`</tbody><tfoot><tr><td class="l" colspan="7">जम्मा (${m.length})</td><td>${fmt(sm(m,'si'))}</td><td></td><td></td></tr></tfoot>`;
+  if(m.length>LIM){$('more').classList.remove('hide');$('more').textContent='थप देखाउनुहोस् ('+(m.length-LIM)+' बाँकी)'}}
+ else{const m=list.slice().sort((a,b)=>b.cur-a.cur);
+  CUR=m.map(x=>({'शाखा':x.branch,'कर्मचारी':x.staff,'समूह':x.group,'सदस्य':x.name,'खाता':x.acc,'आधार ब्याज':Math.round(x.base),'अहिले बाँकी':Math.round(x.cur),'असुल':Math.round(x.rec),'बढेको':Math.round(x.inc),'आधार Days':x.daysThen,'अहिले Days':x.daysNow===null?'चुक्ता':x.daysNow,'अहिलेको वर्ग':x.clsNow}));
+  $('tb').innerHTML='<thead><tr><th class="l">शाखा</th><th class="l">कर्मचारी</th><th class="l">समूह</th><th class="l">सदस्य</th><th class="l">खाता</th><th>आधार ब्याज</th><th>अहिले बाँकी</th><th>असुल</th><th>बढेको</th><th>आधार Days</th><th>अहिले Days</th><th class="l">अहिलेको वर्ग</th></tr></thead><tbody>'+
+   m.slice(0,LIM).map(x=>`<tr><td class="l">${esc(x.branch)}</td><td class="l">${esc(x.staff)}</td><td class="l">${esc(x.group)}</td><td class="l">${esc(x.name)}</td><td class="l">${esc(x.acc)}</td><td>${fmt(x.base)}</td><td class="bad">${fmt(x.cur)}</td><td class="ok">${fmt(x.rec)}</td><td class="bad">${fmt(x.inc)}</td><td>${x.daysThen}</td><td>${x.daysNow===null?'चुक्ता':x.daysNow}</td><td class="l">${esc(x.clsNow)}</td></tr>`).join('')+`</tbody><tfoot><tr><td class="l" colspan="5">जम्मा (${m.length})</td><td>${fmt(sm(m,'base'))}</td><td>${fmt(sm(m,'cur'))}</td><td>${fmt(sm(m,'rec'))}</td><td>${fmt(sm(m,'inc'))}</td><td></td><td></td><td></td></tr></tfoot>`;
+  if(m.length>LIM){$('more').classList.remove('hide');$('more').textContent='थप देखाउनुहोस् ('+(m.length-LIM)+' बाँकी)'}}
+ title()}
+document.querySelectorAll('#cats .tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('#cats .tab').forEach(x=>x.classList.toggle('on',x===t));CAT=t.dataset.c;LIM=300;render()});
+document.querySelectorAll('#views button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#views button').forEach(x=>x.classList.toggle('on',x===b));VIEW=b.dataset.v;LIM=300;render()});
+$('bf').onchange=()=>{$('sf2').value='*';LIM=300;render()};$('sf2').onchange=()=>{LIM=300;render()};
+let qt;$('q').oninput=()=>{clearTimeout(qt);qt=setTimeout(()=>{LIM=300;render()},250)};
+$('more').onclick=()=>{LIM+=500;render()};
+$('csv').onclick=()=>{if(!CUR.length)return;const h=Object.keys(CUR[0]);const e=v=>'"'+String(v).replace(/"/g,'""')+'"';
+ const s='\ufeff'+h.map(e).join(',')+'\n'+CUR.map(r=>h.map(k=>e(r[k])).join(',')).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv;charset=utf-8'}));a.download='interest_'+CAT+'_'+VIEW+'.csv';a.click()};
+</script></body></html>
